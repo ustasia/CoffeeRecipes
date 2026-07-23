@@ -143,6 +143,11 @@
   .sortrow .srname{flex:1;min-width:0;font-family:var(--disp);font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .sortrow .srname small{font-family:var(--mono);font-weight:400;font-size:9.5px;letter-spacing:.06em;color:var(--faint);margin-left:8px}
   .sortrow .pos{flex:0 0 auto;font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .sortrow .rowbtn{flex:0 0 auto;width:34px;height:34px;margin:-3px 0;border:1px solid var(--line-strong);
+    background:var(--raised);color:var(--muted);border-radius:10px;display:flex;align-items:center;justify-content:center;transition:.15s}
+  .sortrow .rowbtn svg{width:15px;height:15px;pointer-events:none}
+  .sortrow .rowbtn:active{color:var(--ink);transform:scale(.94)}
+  .sortrow .rowbtn.del:active{color:var(--danger);border-color:var(--danger)}
   .tabs.hidden,#cards.hidden,footer.hidden{display:none!important}
   .tbtn.active{background:var(--accent);border-color:transparent;color:var(--bg)}
 
@@ -223,7 +228,7 @@
     <button class="tbtn primary" id="btnNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>새 레시피</button>
     <button class="tbtn" id="btnExport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>내보내기</button>
     <button class="tbtn" id="btnImport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m0 0l-4 4m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>가져오기</button>
-    <button class="tbtn" id="btnReorder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 4L4 7M7 4l3 3M17 20V4M17 20l-3-3M17 20l3-3"/></svg>정렬</button>
+    <button class="tbtn" id="btnReorder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 4L4 7M7 4l3 3M17 20V4M17 20l-3-3M17 20l3-3"/></svg>관리</button>
     <button class="tbtn" id="btnReset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8m0-5v5h5"/></svg>기본값</button>
     <input type="file" id="fileImport" accept=".json,application/json,text/plain" hidden>
   </div>
@@ -303,6 +308,7 @@
 "use strict";
 const LS_KEY="brewspec.recipes.v2";
 const SEED_KEY="brewspec.seeded.v1";
+const FIX_KEY="brewspec.fix.iced46.v1";
 const ACCENTS=[["앰버","#E6A24C"],["카퍼","#D07B43"],["틸","#5FB6A8"],["로즈","#E07A93"],["바이올렛","#A88BE0"],["그린","#7FB865"],["블루","#6BA6E0"]];
 
 const DEFAULTS=[
@@ -360,18 +366,22 @@ const DEFAULTS=[
      "HARIO NEO가 소량 푸어의 균일 추출에 유리하지만 V60도 가능.",
      "라이트 로스트 원두 권장. 물은 95–96°C로 높게 유지.",
      "출처: 테츠 카츠야 유튜브 'THE NEO BREW' (2026)."]},
-  {id:"iced46",accent:"#6BA6E0",type:"iced",method:"handdrip",name:"Kasuya Iced 4:6",src:"Tetsu Kasuya · 4:6 · V60",tag:"ICED 4:6",
-   tagline:"4:6 메소드의 아이스 변형. 물의 40%를 얼음으로 대체해 진하게 내리고 급랭. 앞 2번(단맛·산미)·뒤 3번(농도)의 4:6 구조는 그대로.",
-   stats:[["원두","20","g"],["뜨거운 물","180","g"],["얼음","120","g"],["온도","92","°C"]],
-   ingredients:[{nm:"원두 (굵게 · 프렌치프레스 정도)",am:20,u:"g"},{nm:"뜨거운 물 (92°C)",am:180,u:"g"},{nm:"얼음 (서버에)",am:120,u:"g"}],
+  {id:"iced46",accent:"#6BA6E0",type:"iced",method:"handdrip",name:"Kasuya Iced 4:6",src:"Tetsu Kasuya · Iced · V60",tag:"ICED 4:6",
+   tagline:"4:6 구조를 그대로 살린 아이스 플래시 브루. 얼음 위로 뜨겁게 내려 급랭 — 심플하고 향이 또렷하다.",
+   stats:[["원두","20","g"],["물","150","g"],["얼음","80","g"],["푸어","5회",""]],
+   ingredients:[{nm:"원두",am:20,u:"g"},{nm:"뜨거운 물",am:150,u:"g"},{nm:"얼음 (서버에)",am:80,u:"g"}],
    steps:[
-     {t:"세팅 & 분쇄",d:"V60에 필터를 헹궈 예열하고 물은 버린다. 서버에 얼음 120g을 담고, V60을 올린 뒤 원두 20g을 굵게 갈아 담는다. 얼음까지 올린 상태로 스케일을 0점으로 맞춘다. 물은 92°C."},
-     {t:"4:6 푸어 (5회)",d:"45초 간격으로 아래 누적량까지 붓는다(각 푸어 약 10초, 사이엔 물이 거의 빠질 때까지 대기). 앞 2번(72g)이 단맛·산미, 뒤 3번(180g)이 농도를 만든다. 누적 → 0:00·36 / 0:45·72 / 1:30·108 / 2:15·144 / 3:00·180g.",s:45},
-     {t:"급랭 & 서빙",d:"마지막 푸어가 다 빠지면 서버를 가볍게 스월해 남은 얼음을 녹인다. 새 얼음을 채운 잔에 따라 바로 마신다."}],
-   notes:["비율은 커피:물(얼음 포함) = 1:15. 뜨거운 물 180g(60%) + 얼음 120g(40%)로 뽑아 급랭하는 구조라 향이 또렷하다.",
-     "맛 튜닝: 앞 2번(0:00·0:45)을 크게 하면 산미↑, 작게 하면 단맛↑. 뒤 3번을 2번으로 줄이면 연하게·4번으로 늘리면 진하게.",
-     "굵은 분쇄 + 92°C 권장. 밝고 과일향 좋은 라이트~미디엄 로스트가 잘 어울린다.",
-     "출처: 테츠 카츠야 4:6 메소드의 아이스 응용(뜨겁게 추출 후 얼음 급랭)."]}
+     {t:"세팅",d:"V60에 필터를 헹궈 예열하고 물은 버린다. 서버에 얼음 80g을 담고 V60을 올린 뒤, 원두 20g을 갈아 담고 스케일을 0점으로."},
+     {t:"1차 푸어 (0:00)",d:"30g까지 붓고 가볍게 흔들어(shake) 고르게 적신다.",s:40},
+     {t:"2차 푸어 (0:40)",d:"60g까지 붓는다. 여기까지가 앞 40% — 작게 부으면 단맛↑, 크게 부으면 산미↑.",s:30},
+     {t:"3차 푸어 (1:10)",d:"90g까지 붓는다.",s:30},
+     {t:"4차 푸어 (1:40)",d:"120g까지 붓는다.",s:30},
+     {t:"5차 푸어 (2:10)",d:"150g까지 붓는다. 뒤 3번(90g)이 농도를 결정한다."},
+     {t:"급랭 & 서빙",d:"물이 다 빠지면 서버를 스월해 남은 얼음을 녹인다. 새 얼음을 채운 잔에 따라 바로 마신다."}],
+   notes:["누적 목표 → 0:00·30 / 0:40·60 / 1:10·90 / 1:40·120 / 2:10·150g.",
+     "4:6 구조 유지: 앞 2번(60g)이 단맛·산미, 뒤 3번(90g)이 농도.",
+     "얼음 80g은 서버에 미리 담아 급랭용으로 쓴다 — 콜드브루보다 향이 또렷하다.",
+     "출처: 테츠 카츠야 유튜브 아이스 레시피 (본인이 고정한 댓글 기준)."]}
 ];
 
 /* ---------- state + storage ---------- */
@@ -396,6 +406,14 @@ function load(){
     const have=new Set(recipes.map(r=>r.id));
     DEFAULTS.forEach(d=>{if(!have.has(d.id)){recipes.push(structuredClone(d));added.push(d.id);}});
   }
+  // One-time correction: replace the earlier draft of iced46 with the verified recipe
+  try{
+    if(!localStorage.getItem(FIX_KEY)){
+      const i=recipes.findIndex(r=>r.id==="iced46");
+      if(i>-1){const def=DEFAULTS.find(d=>d.id==="iced46");if(def)recipes[i]=structuredClone(def);}
+      localStorage.setItem(FIX_KEY,"1");
+    }
+  }catch(e){}
   // Backfill extraction method on older / imported recipes
   const dmethod={};DEFAULTS.forEach(d=>{dmethod[d.id]=d.method;});
   recipes.forEach(r=>{if(!r.method)r.method=dmethod[r.id]||"aeropress";});
@@ -614,7 +632,9 @@ function saveEditor(){
   };
   if(editState.id){const i=recipes.findIndex(x=>x.id===editState.id);recipes[i]=rec;}
   else{recipes.push(rec);}
-  activeId=rec.id;save();renderAll();closeEditor();toast(editState.id?"저장했어요":"새 레시피를 추가했어요");
+  activeId=rec.id;save();renderAll();closeEditor();
+  if(reordering)buildReorderList();
+  toast(editState.id?"저장했어요":"새 레시피를 추가했어요");
 }
 
 /* ---------- export / import / share-in ---------- */
@@ -687,7 +707,7 @@ btnReorder.onclick=()=>reordering?exitReorder():enterReorder();
 function setReorderLabel(t){const n=[...btnReorder.childNodes].reverse().find(x=>x.nodeType===3&&x.textContent.trim());if(n)n.textContent=t;}
 
 function enterReorder(){
-  if(recipes.length<2){toast("레시피가 2개 이상일 때 정렬할 수 있어요");return;}
+  if(!recipes.length){toast("레시피가 없어요");return;}
   reordering=true;
   btnReorder.classList.add("active");setReorderLabel("완료");
   tabsEl.classList.add("hidden");cardsEl.classList.add("hidden");footerEl.classList.add("hidden");
@@ -696,19 +716,31 @@ function enterReorder(){
 }
 function exitReorder(){
   reordering=false;
-  btnReorder.classList.remove("active");setReorderLabel("정렬");
+  btnReorder.classList.remove("active");setReorderLabel("관리");
   reorderEl.classList.remove("show");reorderEl.innerHTML="";
   tabsEl.classList.remove("hidden");cardsEl.classList.remove("hidden");footerEl.classList.remove("hidden");
   renderAll();
 }
 function buildReorderList(){
-  reorderEl.innerHTML=`<div class="reorder-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 4L4 7M7 4l3 3M17 20V4M17 20l-3-3M17 20l3-3"/></svg>핸들(≡)을 잡고 끌어 순서를 바꾸세요. 바뀐 순서는 자동 저장돼요.</div>`;
+  reorderEl.innerHTML=`<div class="reorder-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M7 4L4 7M7 4l3 3M17 20V4M17 20l-3-3M17 20l3-3"/></svg>핸들(≡)을 끌어 순서 변경 · 오른쪽 아이콘으로 편집/삭제</div>`;
   recipes.forEach(r=>{
     const row=document.createElement("div");
     row.className="sortrow";row.dataset.id=r.id;row.style.setProperty("--srac",r.accent);
     row.innerHTML=`<button class="handle" aria-label="끌어서 이동"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h16M4 12h16M4 16h16"/></svg></button>
       <span class="dotc" style="background:${r.accent}"></span>
-      <span class="srname">${esc(r.name)}<small>${esc(r.tag||(r.type==="iced"?"ICED":"HOT"))}</small></span>`;
+      <span class="srname">${esc(r.name)}<small>${esc(r.tag||(r.type==="iced"?"ICED":"HOT"))}</small></span>
+      <button class="rowbtn" data-ra="edit" aria-label="편집"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4Z"/></svg></button>
+      <button class="rowbtn del" data-ra="del" aria-label="삭제"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m2 0v14a2 2 0 01-2 2H8a2 2 0 01-2-2V6"/></svg></button>`;
+    row.querySelector('[data-ra="edit"]').onclick=()=>{const rec=recipes.find(x=>x.id===r.id);if(rec)openEditor(rec);};
+    row.querySelector('[data-ra="del"]').onclick=()=>{
+      const rec=recipes.find(x=>x.id===r.id);if(!rec)return;
+      if(!confirm(`'${rec.name}' 레시피를 삭제할까요?`))return;
+      recipes=recipes.filter(x=>x.id!==r.id);
+      if(activeId===r.id)activeId=recipes[0]?.id||null;
+      save();
+      if(recipes.length<2){exitReorder();toast("삭제했어요");return;}
+      buildReorderList();toast("삭제했어요");
+    };
     reorderEl.appendChild(row);
   });
   initSortable(reorderEl);
