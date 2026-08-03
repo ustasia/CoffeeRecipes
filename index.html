@@ -6,6 +6,23 @@
 <meta name="theme-color" content="#1C1714">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Brew Spec">
+<meta name="description" content="에어로프레스·핸드드립 챔피언 레시피 — 분량 조절과 단계별 타이머, 오프라인 지원.">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Brew Spec">
+<meta property="og:title" content="Coffee Recipes — Brew Spec">
+<meta property="og:description" content="에어로프레스·핸드드립 챔피언 레시피. 분량 조절과 단계별 타이머, 오프라인 지원.">
+<meta property="og:image" content="https://ustasia.github.io/CoffeeRecipes/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://ustasia.github.io/CoffeeRecipes/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Coffee Recipes — Brew Spec">
+<meta name="twitter:description" content="에어로프레스·핸드드립 챔피언 레시피.">
+<meta name="twitter:image" content="https://ustasia.github.io/CoffeeRecipes/og.png">
 <title>Brew Spec · Coffee Recipes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -92,6 +109,15 @@
   .sechd{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--faint);
     text-transform:uppercase;margin:26px 0 10px;display:flex;align-items:center;gap:10px}
   .sechd::after{content:"";flex:1;height:1px;background:var(--line)}
+  .brewhd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 10px}
+  .brewhd-t{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--faint);text-transform:uppercase}
+  .seqbtn{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:var(--bg);border:1px solid transparent;
+    border-radius:11px;padding:8px 14px;font-family:var(--disp);font-weight:600;font-size:12.5px;transition:.15s;white-space:nowrap}
+  .seqbtn svg{width:13px;height:13px}
+  .seqbtn:active{transform:scale(.96)}
+  .seqbtn.running{background:transparent;color:var(--accent);border-color:var(--accent)}
+  .step{transition:background .2s,box-shadow .2s}
+  .step.step-active{background:rgba(241,234,223,.04);box-shadow:inset 3px 0 0 var(--accent)}
   .ing{display:flex;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
   .ing:last-child{border-bottom:none}
   .ing .nm{flex:1;font-size:14px}
@@ -309,6 +335,7 @@
 const LS_KEY="brewspec.recipes.v2";
 const SEED_KEY="brewspec.seeded.v1";
 const FIX_KEY="brewspec.fix.iced46.v1";
+const FIX_KEY2="brewspec.fix.neobrew-steps.v1";
 const ACCENTS=[["앰버","#E6A24C"],["카퍼","#D07B43"],["틸","#5FB6A8"],["로즈","#E07A93"],["바이올렛","#A88BE0"],["그린","#7FB865"],["블루","#6BA6E0"]];
 
 const DEFAULTS=[
@@ -359,9 +386,18 @@ const DEFAULTS=[
    stats:[["원두","20","g"],["물","300","g"],["온도","95–96","°C"],["푸어","10회",""]],
    ingredients:[{nm:"원두 (라이트 로스트 · 극굵게, C40 40–45클릭)",am:20,u:"g"},{nm:"물 (95–96°C)",am:300,u:"g"}],
    steps:[
-     {t:"세팅 & 분쇄",d:"HARIO NEO(또는 V60)에 필터를 헹군다. 원두 20g을 극굵게 갈아 담고 스케일을 0점으로. 물은 갓 끓인 95–96°C."},
-     {t:"10회 푸어",d:"15초 간격으로 30g씩 총 10회 부어 300g을 맞춘다. 물줄기는 빠르고 고르게, 드리퍼에 고이지 않게. 누적 목표 → 0:00·30 / 0:15·60 / 0:30·90 / 0:45·120 / 1:00·150 / 1:15·180 / 1:30·210 / 1:45·240 / 2:00·270 / 2:15·300g.",s:15},
-     {t:"드로다운",d:"마지막 푸어(2:15) 뒤 물이 완전히 빠질 때까지 기다린 다음 드리퍼를 치운다."}],
+     {t:"세팅 & 분쇄",d:"HARIO NEO(또는 V60)에 필터를 헹군다. 원두 20g을 극굵게 갈아 담고 스케일을 0점으로. 물은 갓 끓인 95–96°C. 이후 15초 간격으로 30g씩 붓는다 — 물줄기는 빠르고 고르게, 드리퍼에 고이지 않게."},
+     {t:"푸어 1 (0:00)",d:"30g까지 붓는다.",s:15},
+     {t:"푸어 2 (0:15)",d:"60g까지 붓는다.",s:15},
+     {t:"푸어 3 (0:30)",d:"90g까지 붓는다.",s:15},
+     {t:"푸어 4 (0:45)",d:"120g까지 붓는다.",s:15},
+     {t:"푸어 5 (1:00)",d:"150g까지 붓는다.",s:15},
+     {t:"푸어 6 (1:15)",d:"180g까지 붓는다.",s:15},
+     {t:"푸어 7 (1:30)",d:"210g까지 붓는다.",s:15},
+     {t:"푸어 8 (1:45)",d:"240g까지 붓는다.",s:15},
+     {t:"푸어 9 (2:00)",d:"270g까지 붓는다.",s:15},
+     {t:"푸어 10 (2:15)",d:"300g까지 붓는다. 마지막 푸어.",s:15},
+     {t:"드로다운",d:"물이 완전히 빠질 때까지 기다린 다음 드리퍼를 치운다."}],
    notes:["핵심은 극굵은 분쇄 + 고온 + 잦은 소량 푸어. 부정적 요소를 억누르기보다 긍정적 향미를 더하는 접근이다.",
      "HARIO NEO가 소량 푸어의 균일 추출에 유리하지만 V60도 가능.",
      "라이트 로스트 원두 권장. 물은 95–96°C로 높게 유지.",
@@ -414,6 +450,15 @@ function load(){
       localStorage.setItem(FIX_KEY,"1");
     }
   }catch(e){}
+  // One-time: replace NEO BREW's bundled pour step with individual pour steps
+  try{
+    if(!localStorage.getItem(FIX_KEY2)){
+      const i=recipes.findIndex(r=>r.id==="neobrew");
+      const def=DEFAULTS.find(d=>d.id==="neobrew");
+      if(i>-1&&def)recipes[i].steps=structuredClone(def.steps);
+      localStorage.setItem(FIX_KEY2,"1");
+    }
+  }catch(e){}
   // Backfill extraction method on older / imported recipes
   const dmethod={};DEFAULTS.forEach(d=>{dmethod[d.id]=d.method;});
   recipes.forEach(r=>{if(!r.method)r.method=dmethod[r.id]||"aeropress";});
@@ -442,6 +487,7 @@ const tabsEl=document.getElementById("tabs");
 const cardsEl=document.getElementById("cards");
 
 function renderAll(){
+  if(typeof seq!=="undefined"&&seq)stopSequence();
   tabsEl.innerHTML="";cardsEl.innerHTML="";
   if(!recipes.length){
     tabsEl.style.display="none";
@@ -494,7 +540,7 @@ function buildCard(r){
       <div class="sechd">재료</div>
       <div id="ings">${r.ingredients.map(g=>`<div class="ing"><span class="nm">${esc(g.nm)}</span><span class="am" data-base="${g.am}">${fmt(g.am*servings[r.id])}<small>${esc(g.u||"")}</small></span></div>`).join("")}</div>`:""}
     ${(r.steps&&r.steps.length)?`
-      <div class="sechd">브루잉</div>
+      <div class="brewhd"><span class="brewhd-t">브루잉</span>${r.steps.some(s=>s.s)?`<button class="seqbtn" data-seq></button>`:""}</div>
       <div>${r.steps.map((s,i)=>`<div class="step"><div class="num">${i+1}</div><div class="scon"><div class="stitle">${esc(s.t)}</div>${s.d?`<div class="sdesc">${esc(s.d)}</div>`:""}${s.s?timerHTML(s.s):""}</div></div>`).join("")}</div>`:""}
     ${(r.notes&&r.notes.length)?`<ul class="notes">${r.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>`:""}
   `;
@@ -507,6 +553,8 @@ function buildCard(r){
   if(minus)minus.onclick=()=>changeServings(r,-1,c);
   if(plus)plus.onclick=()=>changeServings(r,1,c);
   c.addEventListener("click",e=>{const tm=e.target.closest(".timer");if(tm)toggleTimer(tm);});
+  const sb=c.querySelector('[data-seq]');
+  if(sb){setSeqBtn(sb,false);sb.onclick=()=>{if(seq)stopSequence();else startSequence(c,sb);};}
   return c;
 }
 function changeServings(r,d,c){
@@ -518,8 +566,8 @@ function timerHTML(sec){const R=11,C=2*Math.PI*R;return `<div class="timer" data
 
 /* ---------- timers ---------- */
 const active=new WeakMap();
-function toggleTimer(el){
-  if(active.has(el)){clearInterval(active.get(el).iv);active.delete(el);resetTimer(el);return;}
+function runTimer(el,onDone){
+  stopTimer(el);
   const total=parseInt(el.dataset.sec,10),C=parseFloat(el.dataset.c);
   const fg=el.querySelector(".fg"),lab=el.querySelector(".lab");
   el.classList.add("run");el.classList.remove("done");fg.style.strokeDashoffset=0;
@@ -530,12 +578,63 @@ function toggleTimer(el){
     lab.textContent=mmss(Math.ceil(left));
     if(left<=0){clearInterval(iv);active.delete(el);el.classList.remove("run");el.classList.add("done");
       lab.textContent="완료 ✓";fg.style.strokeDashoffset=C.toFixed(2);
-      if(navigator.vibrate)navigator.vibrate([90,60,90]);setTimeout(()=>resetTimer(el),3500);}
+      if(navigator.vibrate)navigator.vibrate([90,60,90]);
+      if(onDone)onDone();else setTimeout(()=>{if(!active.has(el))resetTimer(el);},3500);}
   },100);
   active.set(el,{iv});
 }
+function toggleTimer(el){
+  if(seq)stopSequence();
+  if(active.has(el)){stopTimer(el);return;}
+  runTimer(el,null);
+}
+function stopTimer(el){if(active.has(el)){clearInterval(active.get(el).iv);active.delete(el);}resetTimer(el);}
 function resetTimer(el){el.classList.remove("run","done");el.querySelector(".fg").style.strokeDashoffset=0;el.querySelector(".lab").textContent=el.dataset.sec+"초";}
 function mmss(s){const m=Math.floor(s/60),x=s%60;return m?`${m}:${String(x).padStart(2,"0")}`:`${x}초`;}
+
+/* ---------- sequence auto-run ---------- */
+let seq=null;
+function setSeqBtn(btn,running){
+  const play='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  const stop='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+  btn.innerHTML=(running?stop:play)+(running?"정지":"연속 타이머");
+  btn.classList.toggle("running",running);
+}
+function markActiveStep(el){
+  document.querySelectorAll(".step.step-active").forEach(s=>s.classList.remove("step-active"));
+  if(el){const st=el.closest(".step");if(st)st.classList.add("step-active");}
+}
+function startSequence(card,btn){
+  const timers=[...card.querySelectorAll(".timer")];
+  if(!timers.length)return;
+  stopAllTimers();
+  timers.forEach(resetTimer);
+  seq={timers,idx:0,btn};
+  setSeqBtn(btn,true);
+  runSeqStep();
+}
+function runSeqStep(){
+  if(!seq)return;
+  if(seq.idx>=seq.timers.length){finishSequence(true);return;}
+  const el=seq.timers[seq.idx];
+  markActiveStep(el);
+  el.scrollIntoView({behavior:"smooth",block:"center"});
+  runTimer(el,()=>{ if(!seq)return; seq.idx++; setTimeout(runSeqStep,450); });
+}
+function finishSequence(done){
+  if(!seq)return;
+  const btn=seq.btn;seq=null;
+  markActiveStep(null);
+  if(btn)setSeqBtn(btn,false);
+  if(done&&navigator.vibrate)navigator.vibrate([70,50,70,50,140]);
+}
+function stopSequence(){
+  if(!seq)return;
+  const el=seq.timers[seq.idx];if(el)stopTimer(el);
+  finishSequence(false);
+}
+function stopAllTimers(){document.querySelectorAll(".timer").forEach(el=>{if(active.has(el))stopTimer(el);});}
+
 
 /* ---------- CRUD ---------- */
 function deleteRecipe(r){
